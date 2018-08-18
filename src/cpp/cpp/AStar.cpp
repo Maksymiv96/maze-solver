@@ -21,7 +21,7 @@ int DistanceCalc(cv::Point point1, cv::Point point2)
 	//evclide
 	//return int(sqrt(pow(point1.x + point2.x, 2) + pow(point1.y + point2.y, 2)));
 	//manhatten
-	return int((abs(point1.x - point2.x) * abs(point1.y - point2.y)));
+	return int((abs(point1.x - point2.x) + abs(point1.y - point2.y)));
 }
 
 class Node
@@ -107,51 +107,41 @@ void CheckNeighbor(cv::Mat image, Node *node, cv::Point *destination, priority_q
 		visited->push_back(down);
 	}
 
+	//if you wanna move on all 8 direction uncomment next code;
 
-}
-
-
-
-void test2(priority_queue<int> *a1)
-{
-	a1->push(50);
-	a1->push(48);
-}
-
-void test()
-{
-	priority_queue<int> a1;
-	//concurrency::concurrent_priority_queue<int> a1;
-	a1.push(13);
-	a1.push(5);
-	a1.push(38);
-	a1.push(34);
-	test2(&a1);
-	//int a2 = a1.size()
-	cout << a1.top() << endl;
-	//priority_queue<Node*, vector<Node*>, Compare> nodesToCheck;
-	//priority_queue<Node> nodesToCheck;
-	//priority_queue<Node*, vector<Node*>, less<vector<Node*>::value_type> > nodesToCheck;
-	//priority_queue<Node, vector<Node>, less<vector<Node>::value_type> > nodesToCheck;
-
-	priority_queue<Node, vector<Node>, less<vector<Node>::value_type>> nodesToCheck;
-	/*nodesToCheck.push(Node(2, "ss", NULL));
-
-	nodesToCheck.push(Node(3, "s1", new Node(nodesToCheck.top())));
-	if (nodesToCheck.top().Parent == NULL)
-		cout << "ZERO" << endl;
-	else cout << nodesToCheck.top().Parent->name << endl;
-	cin.get();*/
-	/*nodesToCheck.push(Node(5, "s2", nodesToCheck.top));
-	nodesToCheck.push(Node(4, "s3", nodesToCheck.top));*/
+	//cv::Point sw(node->Possition.x - 1, node->Possition.y+1);
+	//cv::Point se(node->Possition.x + 1, node->Possition.y+1);
+	//cv::Point nw(node->Possition.x-1, node->Possition.y - 1);
+	//cv::Point ne(node->Possition.x+1, node->Possition.y - 1);
 
 
 
-	cin.get();
+	//if (CheckPossitionForMoving(image, ne) && CheckIfCanVisit(visited, ne))
+	//{
+	//	nodes->push(Node(ne, destination, new Node(*node)));
+	//	visited->push_back(ne);
+	//}
+	//if (CheckPossitionForMoving(image, nw) && CheckIfCanVisit(visited, nw))
+	//{
+	//	nodes->push(Node(nw, destination, new Node(*node)));
+	//	visited->push_back(nw);
+	//}
+	//if (CheckPossitionForMoving(image, sw) && CheckIfCanVisit(visited, sw))
+	//{
+	//	nodes->push(Node(sw, destination, new Node(*node)));
+	//	visited->push_back(sw);
+	//}
+	//if (CheckPossitionForMoving(image, se) && CheckIfCanVisit(visited, se))
+	//{
+	//	nodes->push(Node(se, destination, new Node(*node)));
+	//	visited->push_back(se);
+	//}
+
+
 }
 
 //vector<cv::Point> PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinationPossition)
-cv::Mat PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinationPossition)
+cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
 {
 	vector<cv::Point> Path;
 	
@@ -159,7 +149,7 @@ cv::Mat PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinati
 	nodes.push(Node(currentPossition, &destinationPossition, NULL));
 	vector<cv::Point> visitidPoint;
 	cv::Mat local;
-	maze.copyTo(local);
+	maze->copyTo(local);
 	Node buf = nodes.top();
 	int i = 0;
 	//cv::namedWindow("Result");
@@ -168,59 +158,42 @@ cv::Mat PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinati
 		buf = nodes.top();
 		nodes.pop();
 
-		//visitidPoint.push_back(buf.Possition);
-		/*if(buf.Parent!=NULL)
-		cout << buf.Possition << " " << buf.Parent->Possition << " " << buf.DistFromBegin << endl;
-		else cout << buf.Possition << " Parent NULL " << buf.DistFromBegin << endl;
-		*/
-		//cout << buf.DistFromBegin << " " << buf.DistToDest << " " << buf.Total << endl;
-		//visitidPoint.push_back(buf.Possition);
-
-		//if (std::find(visitidPoint.begin(), visitidPoint.end(), buf.Possition) != visitidPoint.end())cout << "youcant";
-		//else
-		//{
-		//	cout << "canandpushing" << endl;
-		//	visitidPoint.push_back(buf.Possition);
-		//}
-		//if (CheckIfCanVisit(&visitidPoint, &buf.Possition)) cout << "youcan" << endl;
-
-		//cout << visitidPoint.size() << endl;
-		//cout << nodes.size() << endl;
-		//std::cout.flush(100);
 		if (buf.Possition == destinationPossition) cout << "detect" << endl;
-		CheckNeighbor(maze, &buf, &destinationPossition, &nodes, &visitidPoint);
-		//cout << nodes.size() << endl;
-		//cin.get();
-		//cout << nodes.size() << endl;
-		//cv::drawMarker(local, buf.Possition, cv::Scalar(255, 255, 255), 0, 3);
-		//if (i == 25)
+		CheckNeighbor(local, &buf, &destinationPossition, &nodes, &visitidPoint);
+
+		//cv::drawMarker(local, buf.Possition, cv::Scalar(255, 255, 255), 0, 1);
+
+		//if (i % 100 == 0)
 		//{
 		//	cv::imshow("Result", local);
 		//	cv::waitKey();
-		//	i = 0;
+		//	//i = 0;
 		//}
-		//i++;
-		//
+		i++;
+		
 		
 
 	} while (nodes.size() > 0 && buf.Possition != destinationPossition);
 	if (buf.Possition == destinationPossition)
 	{
 		cout << "Visited point" << visitidPoint.size() << endl;
-		cout << "Cycle" << nodes.size() << endl;
+		cout << "Cycle" << i << endl;
 		cout << "Success" << endl;
 	}
 	cout << &buf << " " << buf.Possition << " " << buf.Parent << endl;
-	//while (buf.Parent != NULL)
-	//{
-	//	Path.push_back(buf.Possition);
-	//	buf = *buf.Parent;
-	//}
-	//cout << nodes.top().Possition<<" "<<nodes.top().DistFromBegin<<" "<<nodes.top().DistToDest<<" "<<nodes.top().Total<<" "<<nodes.top().Parent << endl;
 	cout << "Path built" << endl;
+	cv::cvtColor(local, local, cv::COLOR_GRAY2BGR);
+	do
+	{
+		cv::drawMarker(local, buf.Possition, cv::Scalar(255, 0, 255), 0, 5);
+		buf = *buf.Parent;
+
+	} while (buf.Parent != NULL);
+
 	//cv::namedWindow("Result");
 	//cv::imshow("Result", local);
 	cin.get();
+	
 	return local;
 	//return Path;
 }
