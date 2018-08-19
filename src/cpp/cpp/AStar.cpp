@@ -182,22 +182,22 @@ void CheckNeighborSecondImpl(cv::Mat *image, Node *node, cv::Point *destination,
 	//if (CheckPossitionForMoving(image, ne) && CheckIfCanVisit(visited, ne))
 	//{
 	//	nodes->push(Node(ne, destination, new Node(*node)));
-	//	visited->push_back(ne);
+	//	cv::drawMarker(*image, ne, cv::Scalar(255, 255, 255), 0, 1);
 	//}
 	//if (CheckPossitionForMoving(image, nw) && CheckIfCanVisit(visited, nw))
 	//{
 	//	nodes->push(Node(nw, destination, new Node(*node)));
-	//	visited->push_back(nw);
+	//	cv::drawMarker(*image, nw, cv::Scalar(255, 255, 255), 0, 1);
 	//}
 	//if (CheckPossitionForMoving(image, sw) && CheckIfCanVisit(visited, sw))
 	//{
 	//	nodes->push(Node(sw, destination, new Node(*node)));
-	//	visited->push_back(sw);
+	//	cv::drawMarker(*image, sw, cv::Scalar(255, 255, 255), 0, 1);
 	//}
 	//if (CheckPossitionForMoving(image, se) && CheckIfCanVisit(visited, se))
 	//{
 	//	nodes->push(Node(se, destination, new Node(*node)));
-	//	visited->push_back(se);
+	//	cv::drawMarker(*image, se, cv::Scalar(255, 255, 255), 0, 1);
 	//}
 
 
@@ -243,9 +243,11 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 		cout << "Visited point" << visitidPoint.size() << endl;
 		cout << "Cycle" << i << endl;
 		cout << "Success" << endl;
+		cout << "Path built" << endl;
 	}
+	else cout << "Cant find path" << endl;
 	cout << &buf << " " << buf.Possition << " " << buf.Parent << endl;
-	cout << "Path built" << endl;
+	
 	maze->copyTo(local);
 	cv::cvtColor(local, local, cv::COLOR_GRAY2BGR);
 	do
