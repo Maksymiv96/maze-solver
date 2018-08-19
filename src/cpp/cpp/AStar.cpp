@@ -64,10 +64,10 @@ public:
 //	}
 //};
 
-bool CheckPossitionForMoving(cv::Mat image, cv::Point possition)
+bool CheckPossitionForMoving(cv::Mat *image, cv::Point possition)
 {
 	//255 - white(no) ; 0 - black - can
-	if (cv::Scalar(image.at<uchar>(possition)).val[0] == 0)return true;
+	if (cv::Scalar(image->at<uchar>(possition)).val[0] == 0)return true;
 	else return false;
 }
 
@@ -77,7 +77,7 @@ bool CheckIfCanVisit(vector<cv::Point> *visited, cv::Point PossitionToCheck)
 
 }
 
-void CheckNeighbor(cv::Mat image, Node *node, cv::Point *destination, priority_queue<Node, vector<Node>, less<vector<Node>::value_type>> *nodes, vector<cv::Point> *visited)
+void CheckNeighbor(cv::Mat *image, Node *node, cv::Point *destination, priority_queue<Node, vector<Node>, less<vector<Node>::value_type>> *nodes, vector<cv::Point> *visited)
 {
 
 	//cout << node->Possition << " " << CheckPossitionForMoving(image,node->Possition) << endl;
@@ -140,6 +140,69 @@ void CheckNeighbor(cv::Mat image, Node *node, cv::Point *destination, priority_q
 
 }
 
+void CheckNeighborSecondImpl(cv::Mat *image, Node *node, cv::Point *destination, priority_queue<Node, vector<Node>, less<vector<Node>::value_type>> *nodes, vector<cv::Point> *visited)
+{
+
+	//cout << node->Possition << " " << CheckPossitionForMoving(image,node->Possition) << endl;
+	cv::Point right(node->Possition.x + 1, node->Possition.y);
+	cv::Point left(node->Possition.x - 1, node->Possition.y);
+	cv::Point top(node->Possition.x, node->Possition.y - 1);
+	cv::Point down(node->Possition.x, node->Possition.y + 1);
+
+	if (CheckPossitionForMoving(image, left))
+	{
+		nodes->push(Node(left, destination, new Node(*node)));
+		cv::drawMarker(*image, left, cv::Scalar(255, 255, 255), 0, 1);
+	}
+	if (CheckPossitionForMoving(image, right))
+	{
+		nodes->push(Node(right, destination, new Node(*node)));
+		cv::drawMarker(*image, right, cv::Scalar(255, 255, 255), 0, 1);
+	}
+	if (CheckPossitionForMoving(image, top))
+	{
+		nodes->push(Node(top, destination, new Node(*node)));
+		cv::drawMarker(*image, top, cv::Scalar(255, 255, 255), 0, 1);
+	}
+	if (CheckPossitionForMoving(image, down))
+	{
+		nodes->push(Node(down, destination, new Node(*node)));
+		cv::drawMarker(*image, down, cv::Scalar(255, 255, 255), 0, 1);
+	}
+
+	//if you wanna move on all 8 direction uncomment next code;
+
+	//cv::Point sw(node->Possition.x - 1, node->Possition.y+1);
+	//cv::Point se(node->Possition.x + 1, node->Possition.y+1);
+	//cv::Point nw(node->Possition.x-1, node->Possition.y - 1);
+	//cv::Point ne(node->Possition.x+1, node->Possition.y - 1);
+
+
+
+	//if (CheckPossitionForMoving(image, ne) && CheckIfCanVisit(visited, ne))
+	//{
+	//	nodes->push(Node(ne, destination, new Node(*node)));
+	//	visited->push_back(ne);
+	//}
+	//if (CheckPossitionForMoving(image, nw) && CheckIfCanVisit(visited, nw))
+	//{
+	//	nodes->push(Node(nw, destination, new Node(*node)));
+	//	visited->push_back(nw);
+	//}
+	//if (CheckPossitionForMoving(image, sw) && CheckIfCanVisit(visited, sw))
+	//{
+	//	nodes->push(Node(sw, destination, new Node(*node)));
+	//	visited->push_back(sw);
+	//}
+	//if (CheckPossitionForMoving(image, se) && CheckIfCanVisit(visited, se))
+	//{
+	//	nodes->push(Node(se, destination, new Node(*node)));
+	//	visited->push_back(se);
+	//}
+
+
+}
+
 //vector<cv::Point> PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinationPossition)
 cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
 {
@@ -159,7 +222,8 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 		nodes.pop();
 
 		if (buf.Possition == destinationPossition) cout << "detect" << endl;
-		CheckNeighbor(local, &buf, &destinationPossition, &nodes, &visitidPoint);
+		//CheckNeighbor(&local, &buf, &destinationPossition, &nodes, &visitidPoint);
+		CheckNeighborSecondImpl(&local, &buf, &destinationPossition, &nodes, &visitidPoint);
 
 		//cv::drawMarker(local, buf.Possition, cv::Scalar(255, 255, 255), 0, 1);
 
@@ -182,6 +246,7 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 	}
 	cout << &buf << " " << buf.Possition << " " << buf.Parent << endl;
 	cout << "Path built" << endl;
+	maze->copyTo(local);
 	cv::cvtColor(local, local, cv::COLOR_GRAY2BGR);
 	do
 	{
