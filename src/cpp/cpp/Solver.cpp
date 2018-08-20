@@ -17,6 +17,10 @@ using namespace std;
 //dont forget to insert folder with imgs to folder
 const string ImageFolder = "../../../imgs/paper/";
 
+Point find_entry(Mat image)
+{
+
+}
 
 Point* find_entry_and_exit(Mat image)
 {
@@ -33,7 +37,7 @@ Point* find_entry_and_exit(Mat image)
 
 int main()
 {
-	Mat img = imread(ImageFolder + "shaped.jpg");
+	Mat img = imread(ImageFolder + "diff.jpg");
 	Size new_size;
 	Mat blured_image;
 	Mat opened_image;
@@ -46,42 +50,17 @@ int main()
 	GaussianBlur(img, blured_image, Size(3, 3), 0, 0);
 	//bilateralFilter(img, blured_image, 1, 20, 5);
 	morphologyEx(blured_image, opened_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 2);
-	cvtColor(blured_image, blured_image, COLOR_BGR2HSV);
-
-
-
-	Mat bgr[3];
-	split(blured_image, bgr);
-	cvtColor(blured_image, blured_image, COLOR_HSV2BGR);
-	/*Mat hsv, mred, mgreen, m1, m2;
-	cvtColor(img, hsv, COLOR_BGR2HSV);
-
-	inRange(hsv, Scalar(0, 40, 50), Scalar(10, 255, 255), m1);
-	inRange(hsv, Scalar(150, 70, 50), Scalar(120, 255, 255), m2);
-	mred = m1 | m2;
-	*/
-	threshold(bgr[0], bgr[0], 0, 255, THRESH_BINARY);
-	threshold(bgr[1], bgr[1], 160, 255, THRESH_BINARY);
-	threshold(bgr[2], bgr[2], 0, 255, THRESH_BINARY);
-
-	vector<Mat> channels;
-	channels.push_back(bgr[0]);
-	channels.push_back(bgr[1]);
-	channels.push_back(bgr[2]);
-	merge(channels, binary_mask_dots);
-	cvtColor(binary_mask_dots, binary_mask_dots, COLOR_HSV2BGR);
-	//morphologyEx(binary_mask_dots,binary_mask_dots, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 5);
-	cvtColor(binary_mask_dots, binary_mask_dots, COLOR_BGR2GRAY);
-	threshold(binary_mask_dots, binary_mask_dots, 250, 255, THRESH_BINARY_INV);
 
 	cvtColor(opened_image, gray_image, CV_BGR2GRAY);
 	threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
 	Canny(thresh_image, edges, 0, 255);
 
+
+	////Creating mask
 	vector<vector<Point>> finded_countours;
 	vector<Vec4i> hierarchy;
 	findContours(thresh_image, finded_countours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
-	drawContours(img, finded_countours, -1, Scalar(255, 0, 0));
+	//drawContours(img, finded_countours, -1, Scalar(255, 0, 0));
 	vector<Point> for_convex;
 
 	//filter contours which size less 10% from highest contour size
@@ -111,11 +90,43 @@ int main()
 	drawContours(thresh_image, closed_maze, -1, Scalar(255, 0, 0), 4);
 	Mat mask(img.size(), CV_8UC1);
 	drawContours(mask, closed_maze, 0, Scalar(255), -1);
+	////
+
+
 	Mat thresh;
 	thresh_image.copyTo(thresh, mask);
 	thresh.copyTo(thresh_image);
 	//bitwise_and(thresh_image, thresh_image, mask);
+	morphologyEx(mask, mask, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
 	morphologyEx(thresh_image, thresh_image, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
+
+
+
+	////DETECTING DOTS
+	//Mat blured;
+	//blured_image.copyTo(blured, mask);
+	//blured.copyTo(blured_image);
+	cvtColor(blured_image, blured_image, COLOR_BGR2HSV);
+	Mat bgr[3];
+	split(blured_image, bgr);
+	cvtColor(blured_image, blured_image, COLOR_HSV2BGR);
+
+	threshold(bgr[0], bgr[0], 0, 255, THRESH_BINARY);
+	threshold(bgr[1], bgr[1], 160, 255, THRESH_BINARY);
+	threshold(bgr[2], bgr[2], 0, 255, THRESH_BINARY);
+
+	vector<Mat> channels;
+	channels.push_back(bgr[0]);
+	channels.push_back(bgr[1]);
+	channels.push_back(bgr[2]);
+	merge(channels, binary_mask_dots);
+	cvtColor(binary_mask_dots, binary_mask_dots, COLOR_HSV2BGR);
+	//morphologyEx(binary_mask_dots,binary_mask_dots, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 5);
+	cvtColor(binary_mask_dots, binary_mask_dots, COLOR_BGR2GRAY);
+	threshold(binary_mask_dots, binary_mask_dots, 250, 255, THRESH_BINARY_INV);
+	////
+
+
 	Mat dots;
 
 	img.copyTo(dots, binary_mask_dots);
@@ -132,17 +143,6 @@ int main()
 	morphologyEx(img_copy, img_copy, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 2);
 	drawContours(img_copy, closed_maze, -1, Scalar(255, 255, 255), 8);
 
-	Mat bgr_2[3];
-	split(img_copy, bgr_2);
-
-	threshold(bgr_2[0], bgr_2[0], 200, 255, THRESH_BINARY);
-	threshold(bgr_2[1], bgr_2[1], 40, 255, THRESH_BINARY);
-	threshold(bgr_2[2], bgr_2[2], 40, 255, THRESH_BINARY);
-	vector<Mat> channels_2;
-	channels_2.push_back(bgr_2[0]);
-	channels_2.push_back(bgr_2[1]);
-	channels_2.push_back(bgr_2[2]);
-	merge(channels_2, img_copy);
 	Point* ex_en = new Point[2];
 	ex_en = find_entry_and_exit(binary_mask_dots);
 	drawMarker(binary_mask_dots, ex_en[0], Scalar(0, 0, 0));
@@ -151,12 +151,7 @@ int main()
 
 	Mat BorderOnly;
 	cv::inRange(img_copy, Scalar(127, 127, 127), Scalar(255, 255, 255), BorderOnly);
-	//drawMarker(BorderOnly, ex_en[0], Scalar(255, 255, 255));
-	//drawMarker(BorderOnly, ex_en[1], Scalar(255, 255, 255));
 
-	//cout << ex_en[1];
-	//cin.get();
-	//resize(BorderOnly, BorderOnly, Size(320,240));
 	PathFinder(&BorderOnly, ex_en[0], ex_en[1]).copyTo(BorderOnly);// .copyTo(BorderOnly);
 
 	namedWindow("Result");
