@@ -29,8 +29,8 @@ Point color_points_detection(Mat *image, int color)
 	{
 		lower = Scalar(45, 100, 40);
 		upper = Scalar(75, 255, 255);
-		
-	} 
+
+	}
 	else if (color == RED)
 	{
 		lower = Scalar(165, 100, 100);
@@ -49,12 +49,10 @@ Point color_points_detection(Mat *image, int color)
 		throw ("Cant detect any point");
 	}
 	else return fitEllipse(contours[0]).center;
-	//cvtColor(*image, *image, COLOR_HSV2BGR);
 }
 
 Point* find_entry_and_exit(Mat image)
 {
-	//maybe better split it on 2 func, one color space for one dot. if in one color space there'll be two dots throw error 
 	Point* points = new Point[2];
 	vector<vector<Point>> finded_countours_1;
 	vector<Vec4i> hierarchy_1;
@@ -73,8 +71,6 @@ int main()
 	Mat opened_image;
 	Mat gray_image;
 	Mat thresh_image;
-	Mat edges;
-	Mat binary_mask_dots;
 
 	//medianBlur(img, blured_image, 5);
 	GaussianBlur(img, blured_image, Size(3, 3), 0, 0);
@@ -83,7 +79,6 @@ int main()
 
 	cvtColor(opened_image, gray_image, CV_BGR2GRAY);
 	threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
-
 
 
 	////Creating mask
@@ -98,7 +93,7 @@ int main()
 
 	for (int i = 0; i < finded_countours.size(); i++)
 	{
-		if (finded_countours[i].size() >(maxContourSize))
+		if (finded_countours[i].size() > (maxContourSize))
 			maxContourSize = finded_countours[i].size();
 	}
 	cout << maxContourSize << endl;
@@ -137,12 +132,11 @@ int main()
 	//Border detecting 
 	Mat BorderOnly;
 	img.copyTo(BorderOnly, mask);
-	color_points_detection(&blured_image, GREEN);
 	cvtColor(BorderOnly, BorderOnly, COLOR_BGR2HSV);
 	inRange(BorderOnly, Scalar(0, 0, 0), Scalar(180, 100, 100), BorderOnly);
 	morphologyEx(BorderOnly, BorderOnly, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
 	morphologyEx(BorderOnly, BorderOnly, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
-	
+
 	//cv::inRange(img_copy, Scalar(127, 127, 127), Scalar(255, 255, 255), BorderOnly);
 
 	PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED)).copyTo(BorderOnly);
