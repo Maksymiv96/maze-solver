@@ -72,14 +72,13 @@ int main()
 	Mat gray_image;
 	Mat thresh_image;
 
-	//medianBlur(img, blured_image, 5);
-	GaussianBlur(img, blured_image, Size(3, 3), 0, 0);
+	GaussianBlur(img, blured_image, Size(3, 3), 5, 3);
 	//bilateralFilter(img, blured_image, 1, 20, 5);
 	morphologyEx(blured_image, opened_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 2);
 
 	cvtColor(opened_image, gray_image, CV_BGR2GRAY);
 	//threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
-	adaptiveThreshold(gray_image, thresh_image, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV, 11, 2);
+	adaptiveThreshold(gray_image, thresh_image, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV, 11, 7);
 
 
 	////Creating mask
@@ -112,7 +111,7 @@ int main()
 	convexHull(for_convex, hull);
 	vector<vector<Point>> closed_maze;
 	closed_maze.push_back(hull);
-	drawContours(img, closed_maze, -1, Scalar(0, 0, 0), 4);
+	//drawContours(img, closed_maze, -1, Scalar(0, 0, 0), 4);
 	drawContours(thresh_image, closed_maze, -1, Scalar(255, 0, 0), 4);
 	Mat mask(img.size(), CV_8UC1);
 	drawContours(mask, closed_maze, 0, Scalar(255), -1);
@@ -144,9 +143,7 @@ int main()
 	//PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED)).copyTo(BorderOnly);
 	vector<Point> path = PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED));
 	drawPathOnImage(&img, &path);
-	/*for (cv::Point& s : path) {
-		cv::drawMarker(img, s, cv::Scalar(255, 0, 255), 0, 5);
-	}*/
+
 	namedWindow("Result");
 	imshow("Result", img);
 	waitKey();
