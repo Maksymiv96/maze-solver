@@ -213,7 +213,7 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 	vector<cv::Point> visitidPoint;
 	cv::Mat local;
 	maze->copyTo(local);
-	Node buf = nodes.top();
+	Nod e buf = nodes.top();
 	int i = 0;
 	//cv::namedWindow("Result");
 	
