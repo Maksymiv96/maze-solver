@@ -65,7 +65,7 @@ Point* find_entry_and_exit(Mat image)
 
 int main()
 {
-	Mat img = imread(ImageFolder + "diff.jpg");
+	Mat img = imread(ImageFolder + "dark.jpg");
 
 	Mat blured_image;
 	Mat opened_image;
@@ -78,7 +78,8 @@ int main()
 	morphologyEx(blured_image, opened_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 2);
 
 	cvtColor(opened_image, gray_image, CV_BGR2GRAY);
-	threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
+	//threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
+	adaptiveThreshold(gray_image, thresh_image, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV, 11, 2);
 
 
 	////Creating mask
@@ -115,6 +116,7 @@ int main()
 	drawContours(thresh_image, closed_maze, -1, Scalar(255, 0, 0), 4);
 	Mat mask(img.size(), CV_8UC1);
 	drawContours(mask, closed_maze, 0, Scalar(255), -1);
+	morphologyEx(mask, mask, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 2);
 	////
 
 
