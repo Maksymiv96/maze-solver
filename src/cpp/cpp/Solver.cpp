@@ -15,7 +15,7 @@ using namespace cv;
 using namespace std;
 
 //dont forget to insert folder with imgs to folder
-const string ImageFolder = "../../../imgs/paper/";
+const string ImageFolder = "../../../imgs/board/";
 const int GREEN = 1, RED = 2;
 
 Point color_points_detection(Mat *image, int color)
@@ -28,15 +28,23 @@ Point color_points_detection(Mat *image, int color)
 	if (color == GREEN)
 	{
 		lower = Scalar(45, 100, 40);
-		upper = Scalar(75, 255, 255);
+		upper = Scalar(80, 255, 255);
+		inRange(buf, lower, upper, mask);
 
 	}
 	else if (color == RED)
 	{
+		lower = Scalar(0, 100, 80);
+		upper = Scalar(15, 255, 255);
+		inRange(buf, lower, upper, mask);
 		lower = Scalar(165, 100, 100);
 		upper = Scalar(180, 255, 255);
+		Mat mask2;
+		inRange(buf, lower, upper, mask2);
+		bitwise_or(mask, mask2, mask);
+
 	}
-	inRange(buf, lower, upper, mask);
+	
 	morphologyEx(mask, mask, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 2);
 	vector<vector<Point>> contours;
 	findContours(mask, contours, RETR_TREE, CHAIN_APPROX_NONE);
@@ -65,7 +73,7 @@ Point* find_entry_and_exit(Mat image)
 
 int main()
 {
-	Mat img = imread(ImageFolder + "dark.jpg");
+	Mat img = imread(ImageFolder + "paint.jpg");
 
 	Mat blured_image;
 	Mat opened_image;
