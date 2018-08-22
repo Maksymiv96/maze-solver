@@ -203,11 +203,11 @@ void CheckNeighborSecondImpl(cv::Mat *image, Node *node, cv::Point *destination,
 
 }
 
-//vector<cv::Point> PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinationPossition)
-cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
+vector<cv::Point> PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
+//cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
 {
 	vector<cv::Point> Path;
-	
+
 	priority_queue<Node, vector<Node>, less<vector<Node>::value_type>> nodes;
 	nodes.push(Node(currentPossition, &destinationPossition, NULL));
 	vector<cv::Point> visitidPoint;
@@ -216,7 +216,7 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 	Node buf = nodes.top();
 	int i = 0;
 	//cv::namedWindow("Result");
-	
+
 	do {
 		buf = nodes.top();
 		nodes.pop();
@@ -234,8 +234,8 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 		//	//i = 0;
 		//}
 		i++;
-		
-		
+
+
 
 	} while (nodes.size() > 0 && buf.Possition != destinationPossition);
 	if (buf.Possition == destinationPossition)
@@ -247,22 +247,35 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 	}
 	else cout << "Cant find path" << endl;
 	cout << &buf << " " << buf.Possition << " " << buf.Parent << endl;
-	
+
 	maze->copyTo(local);
 	cv::cvtColor(local, local, cv::COLOR_GRAY2BGR);
 	do
 	{
-		cv::drawMarker(local, buf.Possition, cv::Scalar(255, 0, 255), 0, 5);
+		//cv::drawMarker(local, buf.Possition, cv::Scalar(255, 0, 255), 0, 5);
+		Path.push_back(buf.Possition);
 		buf = *buf.Parent;
+		
 
 	} while (buf.Parent != NULL);
 
 	//cv::namedWindow("Result");
 	//cv::imshow("Result", local);
 	cin.get();
-	
-	return local;
+
+	return Path;
 	//return Path;
+}
+
+
+void drawPathOnImage(cv::Mat *image, std::vector<cv::Point> *path)
+{
+	//vector<cv::Point> buf(*image);
+	if (path->empty()) throw ("Path is empty");
+
+	for (cv::Point& s : *path) {
+		cv::drawMarker(*image, s, cv::Scalar(255, 0, 255), 0, 5);
+	}
 }
 
 
