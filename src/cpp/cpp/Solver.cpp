@@ -141,12 +141,14 @@ int main()
 
 	//cv::inRange(img_copy, Scalar(127, 127, 127), Scalar(255, 255, 255), BorderOnly);
 
-	PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED)).copyTo(BorderOnly);
-
+	//PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED)).copyTo(BorderOnly);
+	vector<Point> path = PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED));
+	drawPathOnImage(&img, &path);
+	/*for (cv::Point& s : path) {
+		cv::drawMarker(img, s, cv::Scalar(255, 0, 255), 0, 5);
+	}*/
 	namedWindow("Result");
 	imshow("Result", img);
-	namedWindow("Result1");
-	imshow("Result1", BorderOnly);
 	waitKey();
 
 }

@@ -203,8 +203,8 @@ void CheckNeighborSecondImpl(cv::Mat *image, Node *node, cv::Point *destination,
 
 }
 
-//vector<cv::Point> PathFinder(cv::Mat maze, cv::Point currentPossition, cv::Point destinationPossition)
-cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
+vector<cv::Point> PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
+//cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinationPossition)
 {
 	vector<cv::Point> Path;
 
@@ -252,8 +252,10 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 	cv::cvtColor(local, local, cv::COLOR_GRAY2BGR);
 	do
 	{
-		cv::drawMarker(local, buf.Possition, cv::Scalar(255, 0, 255), 0, 5);
+		//cv::drawMarker(local, buf.Possition, cv::Scalar(255, 0, 255), 0, 5);
+		Path.push_back(buf.Possition);
 		buf = *buf.Parent;
+		
 
 	} while (buf.Parent != NULL);
 
@@ -261,8 +263,19 @@ cv::Mat PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Point destinat
 	//cv::imshow("Result", local);
 	cin.get();
 
-	return local;
+	return Path;
 	//return Path;
+}
+
+
+void drawPathOnImage(cv::Mat *image, std::vector<cv::Point> *path)
+{
+	//vector<cv::Point> buf(*image);
+	if (path->empty()) throw ("Path is empty");
+
+	for (cv::Point& s : *path) {
+		cv::drawMarker(*image, s, cv::Scalar(255, 0, 255), 0, 5);
+	}
 }
 
 
