@@ -150,7 +150,7 @@ void paperExtractor(Mat *image, Mat *outImage)
 
 int main()
 {
-	Mat img = imread(ImageFolder + "image (3).png");
+	Mat img = imread(ImageFolder + "imaged.png");
 
 	Mat blured_image;
 	Mat opened_image;
@@ -167,8 +167,8 @@ int main()
 	cvtColor(paperOnly, gray_image, CV_BGR2GRAY);
 	//threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
 	adaptiveThreshold(gray_image, thresh_image, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV, 11, 7);
-	morphologyEx(thresh_image, thresh_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 3);
-	//morphologyEx(thresh_image, thresh_image, MORPH_OPEN, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 3);
+	morphologyEx(thresh_image, thresh_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 4);
+	morphologyEx(thresh_image, thresh_image, MORPH_OPEN, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 1);
 
 
 
