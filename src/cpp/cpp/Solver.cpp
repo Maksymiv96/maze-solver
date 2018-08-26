@@ -136,7 +136,10 @@ void paperExtractor(Mat *image, Mat *outImage)
 	
 	//drawContours(mask, findedCountours, index, Scalar(255), -1);
 	Mat result(image->size(), CV_8UC3);
-	result = Scalar(255, 255, 255);
+	Scalar border = mean(*image, mask);
+	
+	//result = Scalar(255, 255, 255);
+	result = border;
 	result.copyTo(*outImage);
 	image->copyTo(*outImage, mask);
 
