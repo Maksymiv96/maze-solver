@@ -15,7 +15,7 @@ using namespace cv;
 using namespace std;
 
 //dont forget to insert folder with imgs to folder
-const string ImageFolder = "../../../imgs/web/";
+const string ImageFolder = "../../../imgs/paper/";
 const int GREEN = 1, RED = 2;
 
 Point color_points_detection(Mat *image, int color)
@@ -44,13 +44,13 @@ Point color_points_detection(Mat *image, int color)
 		bitwise_or(maskHSV, maskHSV2, maskHSV);
 
 	}
-	
+
 	//morphologyEx(mask, mask, MORPH_OPEN, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 2);
 	//morphologyEx(mask, mask, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 2);
 
 	morphologyEx(maskHSV, maskHSV, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 2);
 	morphologyEx(maskHSV, maskHSV, MORPH_OPEN, getStructuringElement(MORPH_ELLIPSE, Size(5, 5)), Point(-1, -1), 1);
-	
+
 	vector<vector<Point>> contours;
 	findContours(maskHSV, contours, RETR_TREE, CHAIN_APPROX_NONE);
 	if (contours.size() > 1)
@@ -85,7 +85,7 @@ void borderDetection(Mat *image, Mat *threshedImage, Mat *outImage)
 	upper = Scalar(80, 255, 255);
 	inRange(buf, lower, upper, mask2);
 	bitwise_or(mask, mask2, mask);
-	
+
 	mask = 255 - mask;
 
 	threshedImage->copyTo(*outImage, mask);
@@ -95,7 +95,7 @@ void borderDetection(Mat *image, Mat *threshedImage, Mat *outImage)
 
 void paperExtractor(Mat *image, Mat *outImage)
 {
-	Mat maskRGB,maskHSV;
+	Mat maskRGB, maskHSV;
 	Scalar lower, upper;
 	Mat buf;
 	image->copyTo(buf);
@@ -109,12 +109,12 @@ void paperExtractor(Mat *image, Mat *outImage)
 	cvtColor(buf, buf, COLOR_BGR2HSV);
 	inRange(buf, lower, upper, maskHSV);
 	Mat mask;
-	bitwise_or(maskHSV, maskRGB,mask);
+	bitwise_or(maskHSV, maskRGB, mask);
 
 	morphologyEx(mask, mask, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
-	morphologyEx(mask, mask, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3,3)), Point(-1, -1), 3);
+	morphologyEx(mask, mask, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 3);
 
-	
+
 
 	vector<vector<Point>> findedCountours;
 	findContours(mask, findedCountours, RETR_TREE, CHAIN_APPROX_NONE);
@@ -133,11 +133,11 @@ void paperExtractor(Mat *image, Mat *outImage)
 	}
 
 	//Mat result(img.size(), CV_8UC1);
-	
+
 	//drawContours(mask, findedCountours, index, Scalar(255), -1);
 	Mat result(image->size(), CV_8UC3);
 	Scalar border = mean(*image, mask);
-	
+
 	//result = Scalar(255, 255, 255);
 	result = border;
 	result.copyTo(*outImage);
@@ -150,7 +150,10 @@ void paperExtractor(Mat *image, Mat *outImage)
 
 int main()
 {
-	Mat img = imread(ImageFolder + "imaged.png");
+	VideoCapture cap(0); // open the default camera
+	if (!cap.isOpened())  // check if we succeeded
+		return -1;
+	Mat img;// = imread(ImageFolder + "round.jpg");
 
 	Mat blured_image;
 	Mat opened_image;
@@ -158,11 +161,18 @@ int main()
 	Mat thresh_image;
 	Mat paperOnly;
 
+	namedWindow("Result");
+	for (;;)
+	{
+
+		cap >> img;
+		//imshow("Result", img);
+
 	GaussianBlur(img, blured_image, Size(3, 3), 5, 3);
 	//bilateralFilter(img, blured_image, 1, 50, 50);
 	morphologyEx(blured_image, opened_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 2);
 
-	paperExtractor(&blured_image,&paperOnly);
+	paperExtractor(&blured_image, &paperOnly);
 
 	cvtColor(paperOnly, gray_image, CV_BGR2GRAY);
 	//threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
@@ -217,11 +227,19 @@ int main()
 	{
 		vector<Point> path = PathFinder(&BorderOnly, color_points_detection(&paperOnly, GREEN), color_points_detection(&paperOnly, RED));
 		drawPathOnImage(&img, &path);
+		path.clear();
 	}
 	catch (...) {};
-
 	namedWindow("Result");
 	imshow("Result", img);
+			if (waitKey(30) >= 0)
+		{
+			break;
+			destroyAllWindows();
+		}
+
+	}
+
 	waitKey();
 
 }
