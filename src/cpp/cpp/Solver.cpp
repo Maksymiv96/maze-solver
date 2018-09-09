@@ -2,19 +2,20 @@
 //
 #include <iostream>
 #include <string>
+#include <iostream>
+#include <vector>
 
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
 #include "opencv2/features2d.hpp"
 #include "opencv2/highgui.hpp"
-#include <iostream>
-#include <vector>
-#include <AStar.h>
+
+#include "AStar.h"
 
 using namespace cv;
 using namespace std;
 
-//dont forget to insert folder with imgs to folder
+// don't forget to insert folder with images to folder
 const string ImageFolder = "../../../imgs/paper/";
 const int GREEN = 1, RED = 2;
 
@@ -44,22 +45,22 @@ Point color_points_detection(Mat *image, int color)
 	{
 		throw ("Too many points detected");
 	}
-	else if (contours.size() == 0)
+	else if (contours.empty())
 	{
-		throw ("Cant detect any point");
+		throw ("Cannot detect any point");
 	}
 	else return fitEllipse(contours[0]).center;
 }
 
 Point* find_entry_and_exit(Mat image)
 {
-	Point* points = new Point[2];
-	vector<vector<Point>> finded_countours_1;
+	auto * points = new Point[2];
+	vector<vector<Point>> found_contours;
 	vector<Vec4i> hierarchy_1;
-	findContours(image, finded_countours_1, hierarchy_1, RETR_TREE, CHAIN_APPROX_NONE);
-	//drawContours(image, finded_countours, -1, Scalar(255, 0, 0));
-	points[0] = fitEllipse(finded_countours_1[0]).center;
-	points[1] = fitEllipse(finded_countours_1[1]).center;
+	findContours(image, found_contours, hierarchy_1, RETR_TREE, CHAIN_APPROX_NONE);
+	//drawContours(image, found_contours, -1, Scalar(255, 0, 0));
+	points[0] = fitEllipse(found_contours[0]).center;
+	points[1] = fitEllipse(found_contours[1]).center;
 	return points;
 }
 
@@ -67,44 +68,39 @@ int main()
 {
 	Mat img = imread(ImageFolder + "dark.jpg");
 
-	Mat blured_image;
-	Mat opened_image;
-	Mat gray_image;
-	Mat thresh_image;
+	Mat blurred_image, opened_image, gray_image, thresh_image;
 
-	GaussianBlur(img, blured_image, Size(3, 3), 5, 3);
-	//bilateralFilter(img, blured_image, 1, 20, 5);
-	morphologyEx(blured_image, opened_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 2);
+	GaussianBlur(img, blurred_image, Size(3, 3), 5, 3);
+	//bilateralFilter(img, blurred_image, 1, 20, 5);
+	morphologyEx(blurred_image, opened_image, MORPH_CLOSE, getStructuringElement(MORPH_ELLIPSE, Size(3, 3)), Point(-1, -1), 2);
 
-	cvtColor(opened_image, gray_image, CV_BGR2GRAY);
+	cvtColor(opened_image, gray_image, COLOR_BGR2GRAY);
 	//threshold(gray_image, thresh_image, 100, 255, THRESH_BINARY_INV);
 	adaptiveThreshold(gray_image, thresh_image, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV, 11, 7);
 
 
 	////Creating mask
-	vector<vector<Point>> finded_countours;
+	vector<vector<Point>> found_contours;
 	vector<Vec4i> hierarchy;
-	findContours(thresh_image, finded_countours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
-	//drawContours(img, finded_countours, -1, Scalar(255, 0, 0));
+	findContours(thresh_image, found_contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+	//drawContours(img, found_contours, -1, Scalar(255, 0, 0));
 	vector<Point> for_convex;
 
 	//filter contours which size less 10% from highest contour size
-	int maxContourSize = finded_countours[0].size();
+	int maxContourSize = static_cast<int>(found_contours[0].size());
 
-	for (int i = 0; i < finded_countours.size(); i++)
-	{
-		if (finded_countours[i].size() > (maxContourSize))
-			maxContourSize = finded_countours[i].size();
+	for (auto &found_contour : found_contours) {
+		if (found_contour.size() > (maxContourSize))
+			maxContourSize = static_cast<int>(found_contour.size());
 	}
 	cout << maxContourSize << endl;
 	maxContourSize /= 10;
 
-	for (int i = 0; i < finded_countours.size(); ++i)
-	{
-		if (finded_countours[i].size() > maxContourSize)
+	for (auto &found_contour : found_contours) {
+		if (found_contour.size() > maxContourSize)
 		{
-			for (int j = 0; j < finded_countours[i].size(); ++j)
-				for_convex.push_back(finded_countours[i][j]);
+			for (const auto &j : found_contour)
+				for_convex.push_back(j);
 		}
 	}
 	vector<Point> hull;
@@ -126,10 +122,6 @@ int main()
 	//morphologyEx(mask, mask, MORPH_OPEN, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 2);
 	//morphologyEx(thresh_image, thresh_image, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
 
-
-
-
-
 	//Border detecting 
 	Mat BorderOnly;
 	img.copyTo(BorderOnly, mask);
@@ -139,9 +131,9 @@ int main()
 	morphologyEx(BorderOnly, BorderOnly, MORPH_CLOSE, getStructuringElement(MORPH_RECT, Size(3, 3)), Point(-1, -1), 1);
 
 	//cv::inRange(img_copy, Scalar(127, 127, 127), Scalar(255, 255, 255), BorderOnly);
+	//PathFinder(&BorderOnly, color_points_detection(&blurred_image, GREEN), color_points_detection(&blurred_image, RED)).copyTo(BorderOnly);
 
-	//PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED)).copyTo(BorderOnly);
-	vector<Point> path = PathFinder(&BorderOnly, color_points_detection(&blured_image, GREEN), color_points_detection(&blured_image, RED));
+	vector<Point> path = PathFinder(&BorderOnly, color_points_detection(&blurred_image, GREEN), color_points_detection(&blurred_image, RED));
 	drawPathOnImage(&img, &path);
 
 	namedWindow("Result");

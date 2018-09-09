@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+project( MazeSolver )
+find_package( OpenCV REQUIRED )
+add_executable( Solver Solver.cpp )
+add_library(AStar AStar.h AStar.cpp)
+target_link_libraries( Solver ${AStar})
+target_link_libraries( Solver ${OpenCV_LIBS} )
