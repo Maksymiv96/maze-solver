@@ -51,6 +51,7 @@ public:
 	}
 
 
+
 };
 
 
@@ -256,12 +257,16 @@ vector<cv::Point> PathFinder(cv::Mat *maze, cv::Point currentPossition, cv::Poin
 		Path.push_back(buf.Possition);
 		buf = *buf.Parent;
 		
+		
 
 	} while (buf.Parent != NULL);
-
+	
+	nodes = priority_queue<Node, vector<Node>, less<vector<Node>::value_type>>();
+	visitidPoint.clear();
+	
 	//cv::namedWindow("Result");
 	//cv::imshow("Result", local);
-	cin.get();
+	//cin.get();
 
 	return Path;
 	//return Path;
