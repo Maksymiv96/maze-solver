@@ -1,4 +1,0 @@
-/home/fux/projects/pycharm/maze-solver/src/cpp/cpp/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/fux/projects/pycharm/maze-solver/src/cpp/cpp/cmake-build-debug/CMakeFiles/AStar.dir
-/home/fux/projects/pycharm/maze-solver/src/cpp/cpp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/fux/projects/pycharm/maze-solver/src/cpp/cpp/cmake-build-debug/CMakeFiles/Solver.dir
